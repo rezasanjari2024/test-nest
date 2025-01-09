@@ -1,22 +1,39 @@
 // src/users/users.controller.ts
-import { Controller, Get, Post, Body, Param, Delete } from '@nestjs/common';
+import { Controller, Get, Post, Body, Param, Delete, ConflictException, UseGuards } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { User } from '../entities/user.entity';
+import { ApiTags } from '@nestjs/swagger';
+import { UserDto } from 'src/dto/user/user.dto';
+import { plainToClass } from 'class-transformer';
+import { JwtAuthGuard } from 'src/auth/local-auth.guard/jwt-auth.guard';
+import { AuthGuard } from '@nestjs/passport';
+import { JwtStrategy } from 'src/auth/local.strategy/jwt.strategy';
+import { JwtGuard } from 'src/auth/guards/jwt.guard';
 
 @Controller('users')
+@ApiTags('users')
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
   // مسیر برای دریافت همه کاربران
   @Get()
+    @UseGuards(JwtGuard)
   async findAll(): Promise<User[]> {
     return this.usersService.findAll();
   }
 
   // مسیر برای اضافه کردن کاربر جدید
   @Post()
-  async create(@Body() user: Partial<User>): Promise<User> {
-    return this.usersService.create(user);
+  async create(@Body() userDto: UserDto): Promise<UserDto> {
+
+    const existingUser = await this.usersService.findByUsername(userDto.UserName );
+    if (existingUser) {
+      throw new ConflictException('این نام کاربری قبلاً ثبت شده است.');
+    }
+    var user=plainToClass(User,userDto);
+     var result =await this.usersService.create(user);
+     
+      return result;
   }
 
   // مسیر برای پیدا کردن یک کاربر بر اساس id

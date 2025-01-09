@@ -3,7 +3,9 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { User } from '../entities/user.entity';
-
+import * as bcrypt from 'bcrypt';
+import { UserDto } from 'src/dto/user/user.dto';
+import { plainToClass } from 'class-transformer';
 @Injectable()
 export class UsersService {
   constructor(
@@ -11,24 +13,32 @@ export class UsersService {
     private readonly userRepository: Repository<User>,
   ) {}
 
-  // متد برای دریافت تمام کاربران
+
   async findAll(): Promise<User[]> {
-    return this.userRepository.find();
+    return await this.userRepository.find();
   }
 
-  // متد برای ایجاد کاربر جدید
-  async create(user: Partial<User>): Promise<User> {
+
+  async create(user: Partial<User>): Promise<UserDto> {
+    user.password = await bcrypt.hash(user.password, 10);
     const newUser = this.userRepository.create(user);
-    return this.userRepository.save(newUser);
+    var result= this.userRepository.save(newUser);
+    var user1=plainToClass(UserDto,result);
+    return user1;
   }
 
-  // متد برای پیدا کردن یک کاربر با id
   async findOne(id: number): Promise<User> {
     return this.userRepository.findOneBy({ id });
   }
 
-  // متد برای حذف یک کاربر
+  async update(id: number, user: Partial<User>): Promise<User> {
+    await this.userRepository.update(id, user);
+    return this.userRepository.findOneBy({ id });
+  }
   async remove(id: number): Promise<void> {
     await this.userRepository.delete(id);
+  }
+  async findByUsername(username: string): Promise<User> {
+    return await this.userRepository.findOne({ where: { UserName:username } });
   }
 }

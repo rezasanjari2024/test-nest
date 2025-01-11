@@ -10,11 +10,15 @@ async function bootstrap() {
   .setDescription('The API description')
   .setVersion('1.0')
   .addTag('cats')
-  .addBearerAuth()
+  .addBearerAuth({ type: 'http', scheme: 'bearer', bearerFormat: 'JWT' }) // تنظیم به شکل مناسب
+
   .build();
 
   const document = SwaggerModule.createDocument(app, config);
-  app.enableCors();
+  app.enableCors({
+    origin: '*', // یا آدرس‌های خاص که می‌خواهید از آنها درخواست‌ها پذیرفته شود
+    allowedHeaders: 'Authorization, Content-Type', // افزودن هدر Authorization
+  });
   app.useGlobalFilters(new HttpExceptionFilter());
   SwaggerModule.setup('api-docs', app, document);
   await app.listen(3000);

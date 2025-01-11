@@ -10,6 +10,7 @@ export class Account extends Base {
 
     @Column()
     Broker: string;
+    
     @ManyToOne(() => User, { onDelete: 'SET NULL' })
          UserId: User;
 

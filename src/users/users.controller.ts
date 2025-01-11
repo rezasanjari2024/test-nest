@@ -2,7 +2,7 @@
 import { Controller, Get, Post, Body, Param, Delete, ConflictException, UseGuards } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { User } from '../entities/user.entity';
-import { ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { UserDto } from 'src/dto/user/user.dto';
 import { plainToClass } from 'class-transformer';
 import { JwtAuthGuard } from 'src/auth/local-auth.guard/jwt-auth.guard';
@@ -18,6 +18,7 @@ export class UsersController {
   // مسیر برای دریافت همه کاربران
   @Get()
     @UseGuards(JwtGuard)
+    @ApiBearerAuth()
   async findAll(): Promise<User[]> {
     return this.usersService.findAll();
   }

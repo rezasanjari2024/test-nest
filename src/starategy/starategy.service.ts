@@ -1,27 +1,47 @@
 import { Injectable } from '@nestjs/common';
-import { CreateStarategyDto } from 'src/dto/create-starategy.dto';
-import { UpdateStarategyDto } from 'src/dto/update-starategy.dto';
+import { InjectRepository } from '@nestjs/typeorm';
+import { plainToClass } from 'class-transformer';
+import { Strategy } from 'passport-jwt';
+import { find } from 'rxjs';
+import { CreateAccountDto } from 'src/dto/account/create-account.dto';
+import { CreateStarategyDto } from 'src/dto/strategy/create-starategy.dto';
+import { GetStarategyDto } from 'src/dto/strategy/get-strategy.dto';
+import { UpdateStarategyDto } from 'src/dto/strategy/update-starategy.dto';
+import { Starategy } from 'src/entities/starategy.entity';
+import { Repository } from 'typeorm';
 
 
 @Injectable()
 export class StarategyService {
-  create(createStarategyDto: CreateStarategyDto) {
-    return 'This action adds a new starategy';
+  constructor(
+    @InjectRepository(Starategy)
+     private readonly starategyRepository: Repository<Starategy>,
+  ) {}
+  async create(createStarategyDto: CreateStarategyDto): Promise<Starategy> {
+    var starategy=plainToClass(Starategy,createStarategyDto);
+    var result =await this.starategyRepository.save(starategy);
+    return result;
   }
 
-  findAll() {
-    return `This action returns all starategy`;
+ async findAll(userId:number) :Promise<Starategy[]>{
+ var result=await this.starategyRepository.find({relations:['User'],where:{User:{id:userId}}});
+  return result;
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} starategy`;
+  async findOne(id: number):Promise<GetStarategyDto> {
+    const startegy= await this.starategyRepository.findOne({where:{id},relations:['User']});
+    const startegyDto=plainToClass(GetStarategyDto,startegy);
+    return startegyDto;
   }
 
-  update(id: number, updateStarategyDto: UpdateStarategyDto) {
-    return `This action updates a #${id} starategy`;
+ async update(updateStarategyDto: UpdateStarategyDto):Promise<GetStarategyDto> {
+    const {id, ...starategy}=plainToClass(Starategy,updateStarategyDto);
+    var result =await this.starategyRepository.update({id:id},starategy);
+    var starategyDto=await this.findOne(id);
+    return starategyDto;
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} starategy`;
+  async remove(id: number) {
+   var strategy=await this.starategyRepository.delete(id);
   }
 }

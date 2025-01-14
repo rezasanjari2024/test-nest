@@ -21,6 +21,6 @@ async function bootstrap() {
   });
   app.useGlobalFilters(new HttpExceptionFilter());
   SwaggerModule.setup('api-docs', app, document);
-  await app.listen(3000);
+  await app.listen(5000);
 }
 bootstrap();

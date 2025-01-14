@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { MiddlewareConsumer, Module } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { TypeOrmModule } from '@nestjs/typeorm';
@@ -14,6 +14,8 @@ import { LocalStrategy } from './auth/local.strategy/local.strategy.spec';
 import { ProfileController } from './auth/profile.controller';
 import { APP_INTERCEPTOR } from '@nestjs/core';
 import { TransformInterceptor } from './interceptors/transform.interceptor';
+import { ReasonModule } from './reason/reason.module';
+import extractUserIdMiddleware from './middleware/ExtractUserIdMiddleware';
 
 
 @Module({
@@ -42,7 +44,8 @@ import { TransformInterceptor } from './interceptors/transform.interceptor';
     AccountModule,
     StarategyModule,
     JornalModule,
-    AuthModule  ],
+    AuthModule,
+    ReasonModule  ],
   controllers: [AppController, ProfileController],
   providers: [AppService,AuthService,LocalStrategy, {
     provide: APP_INTERCEPTOR,
@@ -50,4 +53,15 @@ import { TransformInterceptor } from './interceptors/transform.interceptor';
   },],
   exports: [AuthService],
 })
-export class AppModule {}
+export class AppModule {
+  configure(consumer: MiddlewareConsumer) {
+    consumer
+      .apply(extractUserIdMiddleware) // استفاده از Middleware
+      .exclude(
+        'auth/login',  // برای مسیرهایی که نمی‌خواهید ایگنور شود
+        'auth/register',
+        'users'
+      )
+      .forRoutes('*'); // اعمال بر روی تمام روترها
+  }
+}

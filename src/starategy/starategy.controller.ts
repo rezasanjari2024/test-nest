@@ -9,6 +9,7 @@ import { plainToClass, plainToInstance } from 'class-transformer';
 import { Request } from 'express';
 import { CustomException } from 'src/filters/customException.filter';
 import { GetStarategyDto } from 'src/dto/strategy/get-strategy.dto';
+import { UserId } from 'src/decorators/userId.decorator';
 
 
 
@@ -28,15 +29,15 @@ export class StarategyController {
   }
 
   @Get()
-async findAll(@Req() req:Request):Promise<GetStarategyDto[]|CustomException>{ 
-const  user:any=req.user;
+async findAll(@UserId() userId:number,@Req() req:Request):Promise<GetStarategyDto[]|CustomException>{ 
 
-if(!user && !user.userId) 
+
+if(!userId) 
   {
   return new CustomException('user not found',404);
 }
-    var starategies=await this.starategyService.findAll(user.userId);
-    console.log(starategies);
+    var starategies=await this.starategyService.findAll(userId);
+   
     var starategiesDto:GetStarategyDto[]=plainToInstance(GetStarategyDto,starategies,{
       excludeExtraneousValues: true, // فقط فیلدهای @Expose به خروجی منتقل می‌شوند
     });
@@ -46,7 +47,9 @@ if(!user && !user.userId)
   
 
   @Get(':id')
- async findOne(@Param('id') id: string):Promise<GetStarategyDto> {
+ async findOne(@Param('id') id: string,@Req() req:Request):Promise<GetStarategyDto> {
+  console.log("userid",req.userId);
+  
     return this.starategyService.findOne(+id);
   }
 

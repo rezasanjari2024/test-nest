@@ -1,4 +1,5 @@
 import { ApiBody, ApiProperty } from "@nestjs/swagger";
+import { Expose } from "class-transformer";
 
  
 export class CreateAccountDto {
@@ -10,7 +11,9 @@ export class CreateAccountDto {
     Broker: string;
 
    @ApiProperty()
-    UserId: number;
+   @Expose({name: 'Strategy'})
+   StrategyId?: number;
+   
 }
 
 

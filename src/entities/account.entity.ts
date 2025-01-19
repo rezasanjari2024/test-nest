@@ -1,6 +1,8 @@
 import { Entity, PrimaryGeneratedColumn, Column, Double, ManyToOne } from 'typeorm';
 import { Base } from './Base';
 import { User } from './user.entity';
+import { Strategy } from './strategy.entity';
+import { Expose } from 'class-transformer';
 
 @Entity()
 export class Account extends Base {
@@ -10,9 +12,13 @@ export class Account extends Base {
 
     @Column()
     Broker: string;
-    
-    @ManyToOne(() => User, { onDelete: 'SET NULL' })
-         UserId: User;
+
+    @Expose({name:'StrategyId'})
+     @ManyToOne(() => Strategy, { onDelete: 'SET NULL' })
+     Strategy: Strategy;
+
+     @Column()
+     UserId:number;
 
    
 }

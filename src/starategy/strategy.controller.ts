@@ -1,5 +1,5 @@
 import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, Req, Put } from '@nestjs/common';
-import { StarategyService } from './starategy.service';
+
 import { CreateStarategyDto } from 'src/dto/strategy/create-starategy.dto';
 import { UpdateStarategyDto } from 'src/dto/strategy/update-starategy.dto';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
@@ -7,9 +7,12 @@ import { JwtGuard } from 'src/auth/guards/jwt.guard';
 
 import { plainToClass, plainToInstance } from 'class-transformer';
 import { Request } from 'express';
-import { CustomException } from 'src/filters/customException.filter';
+import { CustomException } from 'src/helper/filters/customException.filter';
 import { GetStarategyDto } from 'src/dto/strategy/get-strategy.dto';
-import { UserId } from 'src/decorators/userId.decorator';
+import { UserId } from 'src/helper/decorators/userId.decorator';
+import { StrategyService } from './strategy.service';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Strategy } from 'src/entities/strategy.entity';
 
 
 
@@ -17,13 +20,18 @@ import { UserId } from 'src/decorators/userId.decorator';
 @ApiTags('starategy')
  @ApiBearerAuth()
 @UseGuards(JwtGuard)
-export class StarategyController {
-  constructor(private readonly starategyService: StarategyService) {}
+export class StrategyController {
+  
+  constructor(private readonly strategyService: StrategyService) {}
 
   @Post()
-  async create(@Body() createStarategyDto: CreateStarategyDto) :Promise<CreateStarategyDto> {
-    var result =await this.starategyService.create(createStarategyDto);
-    var starategyDto=plainToClass(CreateStarategyDto,result);
+  async create(@UserId() UserId:number,@Body() createStarategyDto: CreateStarategyDto) :Promise<CreateStarategyDto|CustomException> {
+    if (!UserId) {
+      return new CustomException('نام کاربری در توکن وجود ندارد',404);
+      }
+     
+    var result =await this.strategyService.create(UserId,createStarategyDto);
+    var starategyDto=plainToInstance(CreateStarategyDto,result);
     return starategyDto;
 
   }
@@ -36,13 +44,13 @@ if(!userId)
   {
   return new CustomException('user not found',404);
 }
-    var starategies=await this.starategyService.findAll(userId);
+    var starategies=await this.strategyService.findAll(userId);
    
-    var starategiesDto:GetStarategyDto[]=plainToInstance(GetStarategyDto,starategies,{
+    var strategiesDto:GetStarategyDto[]=plainToInstance(GetStarategyDto,starategies,{
       excludeExtraneousValues: true, // فقط فیلدهای @Expose به خروجی منتقل می‌شوند
     });
     
-    return starategiesDto;
+    return strategiesDto;
 }
   
 
@@ -50,16 +58,16 @@ if(!userId)
  async findOne(@Param('id') id: string,@Req() req:Request):Promise<GetStarategyDto> {
   console.log("userid",req.userId);
   
-    return this.starategyService.findOne(+id);
+    return this.strategyService.findOne(+id);
   }
 
   @Put()
  async update(  @Body() updateStarategyDto: UpdateStarategyDto) {
-    return await this.starategyService.update( updateStarategyDto);
+    return await this.strategyService.update( updateStarategyDto);
   }
 
   @Delete(':id')
  async remove(@Param('id') id: string) {
-    return await this.starategyService.remove(+id);
+    return await this.strategyService.remove(+id);
   }
 }

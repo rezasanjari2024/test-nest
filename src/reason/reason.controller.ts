@@ -1,23 +1,30 @@
 
-import { Controller, Get, Post, Body, Param, Delete, Put } from '@nestjs/common';
+import { Controller, Get, Post, Body, Param, Delete, Put, UseGuards } from '@nestjs/common';
 import { ReasonService } from './reason.service';
 
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 
 import { ReasonDto } from 'src/dto/reason/reason.dto';
 import { CreateReasonDto } from 'src/dto/reason/create-reason.dto';
+import { JwtGuard } from 'src/auth/guards/jwt.guard';
+import { UserId } from 'src/helper/decorators/userId.decorator';
+import { CustomException } from 'src/helper/filters/customException.filter';
 
 
 @Controller('reason')
 @ApiBearerAuth()
 @ApiTags("reasons")
+@UseGuards(JwtGuard)
 export class ReasonController {
     constructor(private readonly reasonService: ReasonService) {}
 
     @Post()
-   async create(@Body() createReasonDto: CreateReasonDto):Promise<ReasonDto> {
+   async create(@UserId() userId:number,@Body() createReasonDto: CreateReasonDto):Promise<ReasonDto|CustomException> {
 
-        const result=await this.reasonService.create(createReasonDto);
+     if (!userId) {
+      return new CustomException('ایدی کاربر در توکن وجود ندارد',404);
+      }
+        const result=await this.reasonService.create(userId,createReasonDto);
         return result;
     }
 

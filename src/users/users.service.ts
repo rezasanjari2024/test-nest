@@ -22,7 +22,7 @@ export class UsersService {
   async create(user: Partial<User>): Promise<UserDto> {
     user.password = await bcrypt.hash(user.password, 10);
     const newUser = this.userRepository.create(user);
-    var result= this.userRepository.save(newUser);
+    var result=await this.userRepository.save(newUser);
     var user1=plainToClass(UserDto,result);
     return user1;
   }

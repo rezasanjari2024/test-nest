@@ -14,8 +14,10 @@ export class ReasonService {
         private readonly reasonRepository: Repository<Reason>,  
       ) {}
 
-      async create (reasonDto:CreateReasonDto){
+      async create (userId:number,reasonDto:CreateReasonDto){
         var reason:Reason=plainToClass(Reason,reasonDto);
+        
+        
 
        var result= await this.reasonRepository.save(reason);
         return await this.find(result.id)

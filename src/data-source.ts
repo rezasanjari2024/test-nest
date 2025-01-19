@@ -11,7 +11,7 @@ export const AppDataSource = new DataSource({
   port: 1433,  // پورت پیش‌فرض SQL Server
   username: 'sa',
   password: '26702670',  // رمز عبور
-  database: 'test',  // نام دیتابیس
+  database: 'lion',  // نام دیتابیس
   entities: [__dirname + '/**/*.entity{.ts,.js}'],
   migrations: [__dirname + './../migrations/*{.ts,.js}'],
 

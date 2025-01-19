@@ -5,6 +5,8 @@ import { GetUserDto } from "../user/get-user.dto";
 
  
 export class GetAccountDto {
+    @Expose()
+    id:number
 
     @Expose()
     Balance: number;
@@ -12,9 +14,13 @@ export class GetAccountDto {
     @Expose()
     Broker: string;
 
-   @Expose()
-   @Type(() => GetUserDto)
-    UserId: GetUserDto;
+    @Expose({name:'Strategy'})
+   @Type(() => GetAccountDto)
+   StrategyDto: GetAccountDto;
+   
+   @ApiProperty()
+   UserId:number
+    
 }
 
 

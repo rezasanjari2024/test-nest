@@ -1,22 +1,32 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, Put } from '@nestjs/common';
 import { JornalService } from './jornal.service';
-import { CreateJornalDto } from '../dto/create-jornal.dto';
-import { UpdateJornalDto } from '../dto/update-jornal.dto';
-import { ApiTags } from '@nestjs/swagger';
+import { CreateJornalDto } from '../dto/jornal/create-jornal.dto';
+
+import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
+import { UserId } from 'src/helper/decorators/userId.decorator';
+import { CustomException } from 'src/helper/filters/customException.filter';
+import { UpdateJornalDto } from 'src/dto/jornal/update-jornal.dto';
+import { JwtGuard } from 'src/auth/guards/jwt.guard';
 
 @Controller('jornal')
 @ApiTags('jornal')
+@ApiBearerAuth()
+@UseGuards(JwtGuard)
 export class JornalController {
   constructor(private readonly jornalService: JornalService) {}
 
   @Post()
-  create(@Body() createJornalDto: CreateJornalDto) {
-    return this.jornalService.create(createJornalDto);
+  create(@UserId() userId:number,@Body() createJornalDto: CreateJornalDto) {
+    if (!userId) {
+      return new CustomException('user not found',404);
+      }
+      
+    return this.jornalService.create(userId,createJornalDto);
   }
 
   @Get()
-  findAll() {
-    return this.jornalService.findAll();
+  findAll(@UserId() userId:number) {
+    return this.jornalService.findAll(userId);
   }
 
   @Get(':id')
@@ -24,13 +34,13 @@ export class JornalController {
     return this.jornalService.findOne(+id);
   }
 
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateJornalDto: UpdateJornalDto) {
-    return this.jornalService.update(+id, updateJornalDto);
+  @Put()
+  update(@UserId() UserId: number, @Body() updateJornalDto: UpdateJornalDto) {
+    return this.jornalService.update(UserId, updateJornalDto);
   }
 
   @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.jornalService.remove(+id);
+  remove(@UserId() userId:number,@Param('id') id: string) {
+    return this.jornalService.remove(userId,+id);
   }
 }

@@ -1,9 +1,9 @@
 import { PartialType } from '@nestjs/mapped-types';
-import { CreateAccountDto } from './create-account.dto';
+import { CreateJornalDto } from './create-jornal.dto';
 import { ApiProperty } from '@nestjs/swagger';
 
 
-export class UpdateAccountDto extends PartialType(CreateAccountDto) {
+export class UpdateJornalDto extends PartialType(CreateJornalDto) {
     @ApiProperty()
     id:number
 }

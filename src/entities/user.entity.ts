@@ -19,4 +19,8 @@ export class User extends Base {
 
     @Column()
     UserName: string;
+
+    @Column({ type: 'varbinary',length:'MAX',nullable:true })
+    Profile: Buffer;  // برای ذخیره تصویر به صورت باینری
+
 }

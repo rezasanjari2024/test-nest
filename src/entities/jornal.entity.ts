@@ -1,25 +1,28 @@
 import { Column, Double, Entity, JoinTable, ManyToMany, ManyToOne } from "typeorm";
 import { Base } from "./Base";
-import { SymboleEnum } from "src/enumes/enumes.data";
-import { Starategy } from "./starategy.entity";
-import { User } from "./user.entity";
+import { SymboleEnum } from "src/enums/enumes.data";
+
 import { Reason } from "./Reason.entity";
-import { Feelings } from "./feeling.entity";
+import { Feeling } from "./feeling.entity";
+import { Approval } from "./approval.entity";
+import { Account } from "./account.entity";
+import { Expose } from "class-transformer";
+import { FeelingEnum } from "src/enums/feeing.enum";
 
 @Entity()
 export class Jornal extends Base {
 
    @Column()
-    symboleId:  SymboleEnum;
-
-    @ManyToOne(() => Starategy, { onDelete: 'SET NULL' })
-    StrategyId: Starategy;
-
-    @ManyToOne(() => User, { onDelete: 'SET NULL' })
-     UserId: User;
+    SymboleId:  SymboleEnum;
 
     @Column()
-    ReasonsForEntry: string
+    UserId:  number;
+
+    @Expose({name:"AccountId"})
+    @ManyToOne(() => Account, { onDelete: 'SET NULL' })
+    Account: Account;
+    
+
 
     @Column()
     ResultAfterTp: string
@@ -37,19 +40,20 @@ export class Jornal extends Base {
         @Column('float')
         Fee: number
 
-        @Column({ type: 'nvarchar', length: 'max' })
+        @Column({ type: 'nvarchar', length: 'max' ,nullable:true})
         profileImage: string; // داده‌های Base64 تصویر
 
         @Column()
         Descriotion: string;
- // دلایل ورود
- @ManyToMany(() => Reason)
- @JoinTable({
-   name: 'journalEntryReasons', // جدول پیوندی برای دلایل ورود
-   joinColumn: { name: 'journal_id', referencedColumnName: 'id' },
-   inverseJoinColumn: { name: 'reason_id', referencedColumnName: 'id' },
+
+        // دلایل ورود
+        @ManyToMany(() => Approval)
+        @JoinTable({
+          name: 'journalApproval', // جدول پیوندی برای دلایل ورود
+          joinColumn: { name: 'journal_id', referencedColumnName: 'id' },
+          inverseJoinColumn: { name: 'approval_id', referencedColumnName: 'id' },
  })
- entryReasons: Reason[];
+ Approvals: Approval[];
 
  // دلایل شکست
  @ManyToMany(() => Reason)
@@ -58,15 +62,11 @@ export class Jornal extends Base {
    joinColumn: { name: 'journalId', referencedColumnName: 'id' },
    inverseJoinColumn: { name: 'reasonId', referencedColumnName: 'id' },
  })
- failureReasons: Reason[];
+ Reasons: Reason[];
+//احساسات هنگام معامله
 
- @ManyToMany(() => Reason)
- @JoinTable({
-   name: 'JournalFeelings',
-   joinColumn: { name: 'journalId', referencedColumnName: 'id' },
-   inverseJoinColumn: { name: 'feelingId', referencedColumnName: 'id' },
- })
- feelings: Feelings[];
+@Column('simple-array') 
+ feelings: FeelingEnum[];
 
 
 }
